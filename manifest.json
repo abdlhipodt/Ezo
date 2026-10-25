@@ -1,0 +1,11 @@
+{
+  "name": "مخزني",
+  "short_name": "مخزني",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0E7C86",
+  "theme_color": "#0E7C86"
+}
