@@ -2,6 +2,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {initializeFirestore,getFirestore,persistentLocalCache,persistentMultipleTabManager,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,onSnapshot,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {firebaseConfig,ADMIN_EMAIL} from './config.js';
+import {mountPage,stopPage} from './stock.js';
 
 const $=i=>document.getElementById(i);
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,7 +13,7 @@ let auth=null,db=null,U=null,P=null,unP=null,unU=null,page='home',UM={};
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}
 function screen(h){$('app').innerHTML=h;$('nav').innerHTML=''}
 function msg(e){const c=(e&&e.code)||'';if(c.includes('permission-denied'))return 'ليست لديك صلاحية لهذه العملية';if(c.includes('unavailable')||c.includes('network'))return 'لا يوجد اتصال بالإنترنت';return 'تعذّرت العملية'+(c?' ('+c+')':'')}
-function stop(){if(unP){unP();unP=null}if(unU){unU();unU=null}}
+function stop(){if(unP){unP();unP=null}if(unU){unU();unU=null}stopPage()}
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
@@ -71,7 +72,7 @@ async function boot(u){
 
 function shell(){
   const adm=P.role==='admin';
-  const T=[['home','🏠','الرئيسية']].concat(adm?[['users','👥','المستخدمون']]:[],[['me','👤','حسابي']]);
+  const T=[['home','🏠','الرئيسية'],['items','📦','الأصناف'],['wh','🏭','المخازن']].concat(adm?[['users','👥','المستخدمون']]:[],[['me','👤','حسابي']]);
   if(!T.some(t=>t[0]===page))page='home';
   $('app').innerHTML='<div class="top r"><div class="brand"><div class="lg">EZO</div><div><b>EZO MEDIKAL</b><div class="m">'+esc(P.name||U.email)+'</div></div></div><span class="tag to">'+esc(ROLES[P.role]||'')+'</span></div><div id="pg"></div>';
   $('nav').innerHTML='<div style="--n:'+T.length+'">'+T.map(t=>'<button class="'+(page===t[0]?'on':'')+'" data-a="nav" data-p="'+t[0]+'"><span>'+t[1]+'</span>'+t[2]+'</button>').join('')+'</div>';
@@ -79,11 +80,13 @@ function shell(){
 }
 function draw(){
   if(unU){unU();unU=null}
+  stopPage();
+  if(page==='items'||page==='wh'){mountPage(page,{db,P,U,esc,toast,msg});return}
   if(page==='users'&&P.role==='admin')usersV();else if(page==='me')meV();else homeV();
 }
 function homeV(){
   const ck=(ok,t)=>'<div class="ck">'+(ok?'✅ ':'⬜ ')+t+'</div>';
-  $('pg').innerHTML='<div class="card"><div class="nm">أهلاً '+esc(P.name||'')+'</div><div class="m">صلاحيتك: '+esc(ROLES[P.role]||'')+'</div></div><div class="card"><b>حالة النظام</b>'+ck(1,'تسجيل الدخول بحساب جوجل')+ck(1,'إدارة المستخدمين والصلاحيات')+ck(1,'قاعدة بيانات سحابية محمية')+ck(0,'المخازن والأصناف')+ck(0,'الطلبيات والنقل')+ck(0,'الاستيراد من Excel')+ck(0,'التقارير وسند الصرف')+'</div><div class="card m">هذه النسخة تضع الأساس والحماية. بقية الصفحات تُضاف في المراحل التالية، ونسختك الحالية تبقى تعمل كما هي.</div>';
+  $('pg').innerHTML='<div class="card"><div class="nm">أهلاً '+esc(P.name||'')+'</div><div class="m">صلاحيتك: '+esc(ROLES[P.role]||'')+'</div></div><div class="card"><b>حالة النظام</b>'+ck(1,'تسجيل الدخول بحساب جوجل')+ck(1,'إدارة المستخدمين والصلاحيات')+ck(1,'قاعدة بيانات سحابية محمية')+ck(1,'المخازن والأصناف (مع وزن العبوة)')+ck(0,'الطلبيات والنقل')+ck(0,'الاستيراد من Excel')+ck(0,'التقارير وسند الصرف')+'</div><div class="card m">هذه النسخة تضع الأساس والحماية. بقية الصفحات تُضاف في المراحل التالية، ونسختك الحالية تبقى تعمل كما هي.</div>';
 }
 function meV(){
   $('pg').innerHTML='<div class="card" style="text-align:center">'+(U.photoURL?'<img class="av" referrerpolicy="no-referrer" alt="" src="'+esc(U.photoURL)+'">':'<div class="av"></div>')+'<div class="nm">'+esc(P.name||'')+'</div><div class="m">'+esc(U.email)+'</div><div style="margin-top:6px"><span class="tag to">'+esc(ROLES[P.role]||'')+'</span></div></div><button class="d" style="width:100%" data-a="out">تسجيل الخروج</button><div class="card ab" style="margin-top:12px"><div class="lg">EZO</div><div class="nm">EZO MEDIKAL</div><div class="m">الإصدار 3.0 · المرحلة 1</div><div style="margin-top:8px">تطوير: <b>عبدالله إبراهيم</b></div></div>';
