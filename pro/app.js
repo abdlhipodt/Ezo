@@ -2,7 +2,8 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {initializeFirestore,getFirestore,persistentLocalCache,persistentMultipleTabManager,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,onSnapshot,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {firebaseConfig,ADMIN_EMAIL} from './config.js';
-import {mountPage,stopPage} from './stock.js';
+import {mountPage,stopPage,stopAll} from './stock.js';
+import {mountOrders,stopOrders} from './orders.js';
 
 const $=i=>document.getElementById(i);
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -13,7 +14,7 @@ let auth=null,db=null,U=null,P=null,unP=null,unU=null,page='home',UM={};
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}
 function screen(h){$('app').innerHTML=h;$('nav').innerHTML=''}
 function msg(e){const c=(e&&e.code)||'';if(c.includes('permission-denied'))return 'ليست لديك صلاحية لهذه العملية';if(c.includes('unavailable')||c.includes('network'))return 'لا يوجد اتصال بالإنترنت';return 'تعذّرت العملية'+(c?' ('+c+')':'')}
-function stop(){if(unP){unP();unP=null}if(unU){unU();unU=null}stopPage()}
+function stop(){if(unP){unP();unP=null}if(unU){unU();unU=null}stopPage();stopAll();stopOrders()}
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
@@ -72,17 +73,18 @@ async function boot(u){
 
 function shell(){
   const adm=P.role==='admin';
-  const T=[['home','🏠','الرئيسية'],['items','📦','الأصناف'],['wh','🏭','المخازن']].concat(adm?[['users','👥','المستخدمون']]:[],[['me','👤','حسابي']]);
-  if(!T.some(t=>t[0]===page))page='home';
+  const T=[['home','🏠','الرئيسية'],['items','📦','الأصناف'],['order','🧾','طلبية'],['log','🕘','السجل'],['more','☰','المزيد']];
+  if(!['home','items','order','log','more','wh','users','me'].includes(page)||(page==='users'&&!adm))page='home';
   $('app').innerHTML='<div class="top r"><div class="brand"><div class="lg">EZO</div><div><b>EZO MEDIKAL</b><div class="m">'+esc(P.name||U.email)+'</div></div></div><span class="tag to">'+esc(ROLES[P.role]||'')+'</span></div><div id="pg"></div>';
-  $('nav').innerHTML='<div style="--n:'+T.length+'">'+T.map(t=>'<button class="'+(page===t[0]?'on':'')+'" data-a="nav" data-p="'+t[0]+'"><span>'+t[1]+'</span>'+t[2]+'</button>').join('')+'</div>';
+  $('nav').innerHTML='<div style="--n:'+T.length+'">'+T.map(t=>'<button class="'+((page===t[0]||(t[0]==='more'&&['wh','users','me'].includes(page)))?'on':'')+'" data-a="nav" data-p="'+t[0]+'"><span>'+t[1]+'</span>'+t[2]+'</button>').join('')+'</div>';
   draw();
 }
 function draw(){
   if(unU){unU();unU=null}
   stopPage();
   if(page==='items'||page==='wh'){mountPage(page,{db,P,U,esc,toast,msg});return}
-  if(page==='users'&&P.role==='admin')usersV();else if(page==='me')meV();else homeV();
+  if(['home','order','log','more'].includes(page)){mountOrders(page,{db,P,U,esc,toast,msg});return}
+  if(page==='users'&&P.role==='admin')usersV();else if(page==='me')meV();else mountOrders('home',{db,P,U,esc,toast,msg});
 }
 function homeV(){
   const ck=(ok,t)=>'<div class="ck">'+(ok?'✅ ':'⬜ ')+t+'</div>';

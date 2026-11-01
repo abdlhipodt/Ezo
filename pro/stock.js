@@ -10,14 +10,20 @@ const wname=id=>WH[id]?WH[id].name:'—';
 const wtxt=i=>i.weight?n(i.weight)+' '+(UN[i.unit]||''):'';
 function tot(i){if(!i.weight)return '';let v=i.rem*i.weight,u=i.unit;if(u==='g'&&v>=1000){v/=1000;u='kg'}else if(u==='ml'&&v>=1000){v/=1000;u='l'}return n(v)+' '+UN[u]}
 function exTag(i){if(!i.exp)return '';const d=dd(i.exp);return d<0?'<span class="tag tb">منتهي</span>':d<=30?'<span class="tag tb">ينتهي بعد '+d+' يوم</span>':d<=90?'<span class="tag tw">ينتهي بعد '+d+' يوم</span>':'<span class="tag to">سليم</span>'}
-export function stopPage(){if(unW)unW();if(unI)unI();unW=unI=null;closeS()}
-export function mountPage(p,ctx){
-  stopPage();C=ctx;page=p;
-  $('pg').innerHTML='<div class="card m">جارٍ التحميل...</div>';
-  unW=onSnapshot(collection(C.db,'warehouses'),s=>{WH={};s.forEach(d=>{WH[d.id]=d.data()});R()},e=>C.toast(C.msg(e)));
-  unI=onSnapshot(collection(C.db,'items'),s=>{IT={};s.forEach(d=>{IT[d.id]=d.data()});R()},e=>C.toast(C.msg(e)));
+const hooks=[];
+export const onData=f=>hooks.push(f);
+export const data=()=>({WH,IT});
+export const setPage=p=>{page=p};
+export function stopPage(){closeS()}
+export function stopAll(){if(unW)unW();if(unI)unI();unW=unI=null;WH={};IT={}}
+function sub(){
+  if(unW)return;
+  unW=onSnapshot(collection(C.db,'warehouses'),s=>{WH={};s.forEach(d=>{WH[d.id]=d.data()});R();hooks.forEach(h=>h())},e=>C.toast(C.msg(e)));
+  unI=onSnapshot(collection(C.db,'items'),s=>{IT={};s.forEach(d=>{IT[d.id]=d.data()});R();hooks.forEach(h=>h())},e=>C.toast(C.msg(e)));
 }
-function R(){if(page==='wh')whV();else itemsV()}
+export function ensure(ctx){C=ctx;sub()}
+export function mountPage(p,ctx){C=ctx;page=p;closeS();$('pg').innerHTML='<div class="card m">جارٍ التحميل...</div>';sub();R()}
+function R(){if(page==='wh')whV();else if(page==='items')itemsV()}
 function whV(){
   const ids=Object.keys(WH).sort((a,b)=>WH[a].name.localeCompare(WH[b].name,'ar'));
   $('pg').innerHTML=(isA()?'<div class="card"><b>إضافة مخزن</b><input id="wn" placeholder="اسم المخزن" style="margin-top:8px"><button style="width:100%" data-s="addwh">إضافة</button></div>':'')+
