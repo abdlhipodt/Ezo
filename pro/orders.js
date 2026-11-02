@@ -33,22 +33,28 @@ function homeV(){
 }
 function orderV(){
   const {WH}=data(),ids=Object.keys(WH);
-  $('pg').innerHTML='<div class="m" style="margin-bottom:8px">اكتب الكمية بجانب كل صنف مطلوب ثم اضغط تأكيد.</div><select id="ocw"><option value="all">كل المخازن</option>'+ids.map(k=>'<option value="'+k+'"'+(cw===k?' selected':'')+'>'+C.esc(WH[k].name)+'</option>').join('')+'</select><input id="oq" type="search" placeholder="ابحث عن صنف" value="'+C.esc(q)+'"><div id="lst"></div><div id="obar"></div>';
+  $('pg').innerHTML='<div id="otot" class="otot"></div><div class="m" style="margin-bottom:8px">اكتب الكمية بجانب كل صنف مطلوب ثم اضغط تأكيد.</div><select id="ocw"><option value="all">كل المخازن</option>'+ids.map(k=>'<option value="'+k+'"'+(cw===k?' selected':'')+'>'+C.esc(WH[k].name)+'</option>').join('')+'</select><input id="oq" type="search" placeholder="ابحث عن صنف" value="'+C.esc(q)+'"><div id="lst"></div><div id="obar"></div>';
   L();
 }
 function L(){
   const {WH,IT}=data(),w=norm(q).split(/\s+/).filter(Boolean);
   const ks=Object.keys(IT).filter(k=>{const i=IT[k];if(cw!=='all'&&i.wh!==cw)return false;const h=norm(i.name+' '+i.code+' '+(i.boxes||''));return w.every(x=>h.includes(x))}).sort((a,b)=>IT[a].name.localeCompare(IT[b].name,'ar'));
-  $('lst').innerHTML=ks.length?ks.map(k=>{const i=IT[k],v=cart[k]||'';return '<div class="card"><div class="ln" style="border:0;padding:0"><span style="flex:1"><b>'+C.esc(i.name)+'</b><div class="m">'+C.esc((WH[i.wh]||{}).name||'')+' · المتبقي: '+n(i.rem)+'</div></span><input type="number" inputmode="numeric" min="0" placeholder="0" data-qi="'+k+'" value="'+v+'" '+(i.rem<=0||!canW()?'disabled':'')+' style="width:96px;margin:0;text-align:center;font-size:20px;font-weight:700;'+(v>i.rem?'border-color:var(--bad)':'')+'"></div></div>'}).join(''):'<div class="card m">لا توجد أصناف.</div>';
+  $('lst').innerHTML=ks.length?ks.map(k=>{const i=IT[k],v=cart[k]||'';return '<div class="card"><div class="ln" style="border:0;padding:0"><span style="flex:1"><b>'+C.esc(i.name)+'</b><div class="m">'+C.esc((WH[i.wh]||{}).name||'')+' · المتبقي: '+n(i.rem)+'</div><div class="m">السعر: '+n(i.price||0)+' <b class="gold" id="st'+k+'">'+(v>0?'= '+n(v*(i.price||0)):'')+'</b></div></span><input type="number" inputmode="numeric" min="0" placeholder="0" data-qi="'+k+'" value="'+v+'" '+(i.rem<=0||!canW()?'disabled':'')+' style="width:96px;margin:0;text-align:center;font-size:20px;font-weight:700;'+(v>i.rem?'border-color:var(--bad)':'')+'"></div></div>'}).join(''):'<div class="card m">لا توجد أصناف.</div>';
   bar();
 }
-function bar(){const b=$('obar'),c=Object.keys(cart).length;if(b)b.innerHTML=c&&canW()?'<button class="cartbar" style="left:12px" data-o="cart">تأكيد الطلبية ('+c+' أصناف)</button>':''}
+function bar(){
+  const {IT}=data();let t=0,c=0;
+  Object.keys(cart).forEach(k=>{const i=IT[k];if(i){c++;t+=cart[k]*(i.price||0)}});
+  const b=$('obar'),o=$('otot');
+  if(b)b.innerHTML=c&&canW()?'<button class="cartbar" style="left:12px" data-o="cart">تأكيد الطلبية ('+c+' أصناف) · '+n(t)+'</button>':'';
+  if(o){o.innerHTML='<span>🧾 '+c+' أصناف</span><span>الإجمالي <b class="gold big">'+n(t)+'</b></span>';if(o._t!==t){o._t=t;o.className='otot';void o.offsetWidth;o.className='otot bump'}}
+}
 function sheet(h){closeS();const d=document.createElement('div');d.className='sh';d.id='shy';d.onclick=e=>{if(e.target===d)closeS()};d.innerHTML='<div>'+h+'</div>';document.body.appendChild(d)}
 function closeS(){const s=$('shy');if(s)s.remove()}
 const hd=t=>'<div class="r"><span class="nm" style="font-size:20px">'+t+'</span><button class="s x" data-o="close">إغلاق</button></div>';
 function cartSheet(){
   const {IT}=data();let t=0;
-  const rows=Object.keys(cart).filter(k=>IT[k]).map(k=>{const i=IT[k];t+=cart[k]*(i.price||0);return '<div class="ln"><span>'+C.esc(i.name)+'<div class="m">متبقي '+n(i.rem)+'</div></span><b>× '+n(cart[k])+'</b></div>'}).join('');
+  const rows=Object.keys(cart).filter(k=>IT[k]).map(k=>{const i=IT[k];t+=cart[k]*(i.price||0);return '<div class="ln"><span>'+C.esc(i.name)+'<div class="m">'+n(i.price||0)+' × '+n(cart[k])+'</div></span><b class="gold">'+n(cart[k]*(i.price||0))+'</b></div>'}).join('');
   sheet(hd('تأكيد الطلبية')+rows+'<div class="r" style="margin:8px 0"><span>الإجمالي</span><b class="big">'+n(t)+'</b></div><label>اسم المستلم *</label><input id="rn"><label>رقم المستلم *</label><input id="rp" type="tel" inputmode="tel"><div id="re" class="er"></div><div class="g2"><button data-o="confirm">تأكيد وخصم</button><button class="d" data-o="clear">مسح</button></div>');
 }
 async function confirmOrder(btn){
@@ -92,7 +98,7 @@ function moreV(){
 document.addEventListener('input',e=>{
   const t=e.target;if(!C)return;
   if(t.id==='oq'){q=t.value;L()}
-  else if(t.dataset&&t.dataset.qi){const k=t.dataset.qi,v=parseFloat(t.value),i=data().IT[k];if(v>0)cart[k]=v;else delete cart[k];t.style.borderColor=i&&v>i.rem?'var(--bad)':'';bar()}
+  else if(t.dataset&&t.dataset.qi){const k=t.dataset.qi,v=parseFloat(t.value),i=data().IT[k];if(v>0)cart[k]=v;else delete cart[k];t.style.borderColor=i&&v>i.rem?'var(--bad)':'';const se=$('st'+k);if(se)se.textContent=v>0&&i?'= '+n(v*(i.price||0)):'';bar()}
 });
 document.addEventListener('change',e=>{if(C&&e.target.id==='ocw'){cw=e.target.value;L()}});
 document.addEventListener('click',async ev=>{
