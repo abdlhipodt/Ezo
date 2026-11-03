@@ -15,7 +15,7 @@ export const onData=f=>hooks.push(f);
 export const data=()=>({WH,IT});
 export const setPage=p=>{page=p};
 export function stopPage(){closeS()}
-export function stopAll(){if(unW)unW();if(unI)unI();unW=unI=null;WH={};IT={}}
+export function stopAll(){if(unW)unW();if(unI)unI();unW=unI=null;WH={};IT={};q='';cw='all'}
 function sub(){
   if(unW)return;
   unW=onSnapshot(collection(C.db,'warehouses'),s=>{WH={};s.forEach(d=>{WH[d.id]=d.data()});R();hooks.forEach(h=>h())},e=>C.toast(C.msg(e)));

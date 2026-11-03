@@ -10,7 +10,7 @@ const canW=()=>C.P.role==='admin'||C.P.role==='keeper';
 const mail=()=>String(C.U.email).toLowerCase();
 function err(e){const m=String(e&&e.message||'');if(m.startsWith('short:')){const p=m.split(':');return 'الكمية من '+p[1]+' أكبر من المتبقي ('+n(p[2])+')'}if(m.startsWith('missing:'))return 'صنف محذوف: '+m.slice(8);if(m==='done')return 'هذه الطلبية ملغاة مسبقاً';const c=String(e&&e.code||'');if(c.includes('unavailable')||c.includes('failed-precondition')||c.includes('network'))return 'يلزم اتصال بالإنترنت لتأكيد العملية';return C.msg(e)}
 onData(()=>{if(!C)return;if(page==='order')L();else if(page==='home'||page==='log')draw()});
-export function stopOrders(){if(unO)unO();unO=null;OR={};closeS()}
+export function stopOrders(){if(unO)unO();unO=null;OR={};cart={};q='';cw='all';closeS()}
 function subO(){
   if(unO)return;
   unO=onSnapshot(query(collection(C.db,'orders'),orderBy('createdAt','desc'),limit(100)),s=>{OR={};s.forEach(d=>{OR[d.id]=d.data({serverTimestamps:'estimate'})});if(page==='home'||page==='log')draw()},e=>C.toast(C.msg(e)));
@@ -25,7 +25,7 @@ function homeV(){
   let m=0;const out={};Object.values(OR).forEach(o=>{if(o.status!=='active'||Date.now()-ts(o)>2592e6)return;m+=o.total||0;o.lines.forEach(l=>{out[l.name]=(out[l.name]||0)+l.qty})});
   const top=Object.keys(out).sort((a,b)=>out[b]-out[a]).slice(0,3),ids=Object.keys(WH);
   const vs=ids.map(k=>val(it.filter(i=>i.wh===k))),mx=Math.max(1,...vs);
-  $('pg').innerHTML='<div class="grid"><div class="stat hero"><span>قيمة المخزون</span><b>'+n(val(it))+'</b></div><div class="stat"><span class="m">عدد الأصناف</span><b>'+n(it.length)+'</b></div><div class="stat"><span class="m">مصروف آخر 30 يوم</span><b>'+n(m)+'</b></div><div class="stat"><span class="m">قريب الانتهاء</span><b style="color:var(--bad)">'+nr.length+'</b></div><div class="stat"><span class="m">ناقص أو نافد</span><b style="color:var(--wn)">'+lw.length+'</b></div></div>'+
+  $('pg').innerHTML='<div class="grid"><div class="stat key"><span>قيمة المخزون</span><b>'+n(val(it))+'</b></div><div class="stat"><span class="m">عدد الأصناف</span><b>'+n(it.length)+'</b></div><div class="stat"><span class="m">مصروف آخر 30 يوم</span><b>'+n(m)+'</b></div><div class="stat"><span class="m">قريب الانتهاء</span><b style="color:var(--bad)">'+nr.length+'</b></div><div class="stat"><span class="m">ناقص أو نافد</span><b style="color:var(--wn)">'+lw.length+'</b></div></div>'+
   (ids.length>1?'<h2>المخازن</h2>'+ids.map((k,j)=>'<div class="card"><div class="r"><b>'+C.esc(WH[k].name)+'</b><span>'+n(vs[j])+'</span></div><div class="bar"><i style="width:'+Math.round(vs[j]/mx*100)+'%"></i></div></div>').join(''):'')+
   '<h2>تنبيهات الانتهاء</h2>'+(nr.length?nr.slice(0,5).map(i=>'<div class="card r"><div><b>'+C.esc(i.name)+'</b><div class="m">'+C.esc((WH[i.wh]||{}).name||'')+' · متبقي '+n(i.rem)+'</div></div><span class="tag '+(dd(i.exp)<=30?'tb':'tw')+'">'+(dd(i.exp)<0?'منتهي':'بعد '+dd(i.exp)+' يوم')+'</span></div>').join(''):'<div class="card m">لا توجد أصناف قريبة الانتهاء.</div>')+
   '<h2>نقص المخزون</h2>'+(lw.length?lw.slice(0,5).map(i=>'<div class="card r"><b>'+C.esc(i.name)+'</b><span class="tag '+(i.rem<=0?'tb':'tw')+'">'+(i.rem<=0?'نافد':'متبقي '+n(i.rem))+'</span></div>').join(''):'<div class="card m">لا يوجد نقص.</div>')+
@@ -47,7 +47,7 @@ function bar(){
   Object.keys(cart).forEach(k=>{const i=IT[k];if(i){c++;t+=cart[k]*(i.price||0)}});
   const b=$('obar'),o=$('otot');
   if(b)b.innerHTML=c&&canW()?'<button class="cartbar" style="left:12px" data-o="cart">تأكيد الطلبية ('+c+' أصناف) · '+n(t)+'</button>':'';
-  if(o){o.innerHTML='<span>🧾 '+c+' أصناف</span><span>الإجمالي <b class="gold big">'+n(t)+'</b></span>';if(o._t!==t){o._t=t;o.className='otot';void o.offsetWidth;o.className='otot bump'}}
+  if(o){o.innerHTML='<span>'+c+' أصناف</span><span>الإجمالي <b class="gold big">'+n(t)+'</b></span>';if(o._t!==t){o._t=t;o.className='otot';void o.offsetWidth;o.className='otot bump'}}
 }
 function sheet(h){closeS();const d=document.createElement('div');d.className='sh';d.id='shy';d.onclick=e=>{if(e.target===d)closeS()};d.innerHTML='<div>'+h+'</div>';document.body.appendChild(d)}
 function closeS(){const s=$('shy');if(s)s.remove()}
@@ -92,8 +92,8 @@ async function cancelOrder(id,btn){
   }catch(e){C.toast(err(e));btn.disabled=false}
 }
 function moreV(){
-  const L=[['wh','🏭','المخازن','إضافة وإدارة المخازن']].concat(C.P.role==='admin'?[['users','👥','المستخدمون','الصلاحيات والحسابات']]:[],[['me','👤','حسابي','الحساب وتسجيل الخروج']]);
-  $('pg').innerHTML=L.map(x=>'<div class="card it r" data-a="nav" data-p="'+x[0]+'"><div><b>'+x[1]+' '+x[2]+'</b><div class="m">'+x[3]+'</div></div><span>‹</span></div>').join('');
+  const L=[['wh',C.ic.wh,'المخازن','إضافة وإدارة المخازن']].concat(C.P.role==='admin'?[['users',C.ic.users,'المستخدمون','الصلاحيات والحسابات']]:[],[['me',C.ic.me,'حسابي','الحساب وتسجيل الخروج']]);
+  $('pg').innerHTML=L.map(x=>'<div class="card it r" data-a="nav" data-p="'+x[0]+'"><div class="mi"><span class="ico">'+x[1]+'</span><div><b>'+x[2]+'</b><div class="m">'+x[3]+'</div></div></div><span class="chev">‹</span></div>').join('');
 }
 document.addEventListener('input',e=>{
   const t=e.target;if(!C)return;
