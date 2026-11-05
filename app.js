@@ -17,6 +17,8 @@ const IC={
   more:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
   wh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-5 9 5v12"/><path d="M8 21v-7h8v7"/><path d="M8 17.5h8"/></svg>',
   users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.4c2 .8 3.5 2.6 3.5 5.6"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4.4L4 8.5"/><path d="M4 4v4.5h4.5"/><path d="M4 13a8 8 0 0 0 14.5 4.4L20 15.5"/><path d="M20 20v-4.5h-4.5"/></svg>',
+  bk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>',
   me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>'
 };
 const GG='<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>';
@@ -34,7 +36,7 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(
 function setupV(){screen('<div class="splash"><div class="lg">EZO</div><h1>إعداد مطلوب</h1><p>افتح ملف config.js والصق إعدادات Firebase وإيميل المدير، ثم أعد رفعه.</p></div>')}
 function loadV(t){screen('<div class="splash"><div class="sp"></div><p>'+esc(t||'جارٍ التحميل...')+'</p></div>')}
 function loginV(m){
-  screen('<div class="splash"><div class="lg">EZO</div><h1>EZO MEDIKAL</h1><p>نظام إدارة المخازن</p><button id="gl" class="g">'+GG+'<span>المتابعة بحساب Google</span></button><div class="er">'+esc(m||'')+'</div><div class="m ft">تطوير: عبدالله إبراهيم</div></div>');
+  screen('<div class="splash"><div class="lg">EZO</div><h1>EZO MEDIKAL</h1><p>نظام إدارة المخازن</p><button id="gl" class="g">'+GG+'<span>المتابعة بحساب Google</span></button><div class="er">'+esc(m||'')+'</div><div class="m ft">تصميم وتطوير<br><b>عبدالله إبراهيم سفيان</b></div></div>');
   $('gl').onclick=login;
 }
 async function login(){
@@ -89,7 +91,7 @@ function shell(){
   const adm=P.role==='admin';
   const T=[['home',IC.home,'الرئيسية'],['items',IC.box,'الأصناف'],['order',IC.order,'طلبية'],['log',IC.log,'السجل'],['more',IC.more,'المزيد']];
   if(!['home','items','order','log','more','wh','users','me'].includes(page)||(page==='users'&&!adm))page='home';
-  $('app').className='';$('app').innerHTML='<div class="top r"><div class="brand"><div class="lg">EZO</div><div><b>EZO MEDIKAL</b><div class="m">'+esc(P.name||U.email)+'</div></div></div><span class="tag to">'+esc(ROLES[P.role]||'')+'</span></div><div id="pg"></div>';
+  $('app').className='';$('app').innerHTML='<div class="top r"><div class="brand"><div class="lg">EZO</div><div><b>EZO MEDIKAL</b><div class="m">'+esc(P.name||U.email)+'</div></div></div><div class="hr"><button class="ic" data-a="refresh" aria-label="تحديث">'+IC.refresh+'</button><span class="tag to">'+esc(ROLES[P.role]||'')+'</span></div></div><div id="pg"></div>';
   $('nav').innerHTML='<div style="--n:'+T.length+'">'+T.map(t=>'<button class="'+((page===t[0]||(t[0]==='more'&&['wh','users','me'].includes(page)))?'on':'')+'" data-a="nav" data-p="'+t[0]+'"><span>'+t[1]+'</span>'+t[2]+'</button>').join('')+'</div>';
   draw();
 }
@@ -101,7 +103,7 @@ function draw(){
   if(page==='users'&&P.role==='admin')usersV();else if(page==='me')meV();else mountOrders('home',ctx());
 }
 function meV(){
-  $('pg').innerHTML='<div class="card" style="text-align:center">'+(U.photoURL?'<img class="av" referrerpolicy="no-referrer" alt="" src="'+esc(U.photoURL)+'">':'<div class="av"></div>')+'<div class="nm">'+esc(P.name||'')+'</div><div class="m">'+esc(U.email)+'</div><div style="margin-top:6px"><span class="tag to">'+esc(ROLES[P.role]||'')+'</span></div></div><button class="d" style="width:100%" data-a="out">تسجيل الخروج</button><div class="card ab" style="margin-top:12px"><div class="lg">EZO</div><div class="nm">EZO MEDIKAL</div><div class="m">الإصدار 3.1</div><div style="margin-top:8px">تطوير: <b>عبدالله إبراهيم</b></div></div>';
+  $('pg').innerHTML='<div class="card" style="text-align:center">'+(U.photoURL?'<img class="av" referrerpolicy="no-referrer" alt="" src="'+esc(U.photoURL)+'">':'<div class="av"></div>')+'<div class="nm">'+esc(P.name||'')+'</div><div class="m">'+esc(U.email)+'</div><div style="margin-top:6px"><span class="tag to">'+esc(ROLES[P.role]||'')+'</span></div></div><button class="d" style="width:100%" data-a="out">تسجيل الخروج</button><div class="card ab" style="margin-top:12px"><div class="lg">EZO</div><div class="nm">EZO MEDIKAL</div><div class="m">الإصدار 3.2</div><div style="margin-top:8px">تصميم وتطوير<br><b>عبدالله إبراهيم سفيان</b></div></div>';
 }
 function usersV(){
   $('pg').innerHTML='<div class="card"><b>إضافة مستخدم</b><label>إيميل جوجل</label><input id="ne" type="email" inputmode="email" autocapitalize="none" placeholder="name@gmail.com"><label>الاسم</label><input id="nn"><label>الصلاحية</label><select id="nr"><option value="keeper">أمين مخزن (إدخال وصرف)</option><option value="viewer">مشاهد فقط</option><option value="admin">مدير</option></select><div id="ue" class="er"></div><button style="width:100%" data-a="add">إضافة</button></div><h2>المستخدمون</h2><div id="ul"><div class="card m">جارٍ التحميل...</div></div>';
@@ -114,6 +116,30 @@ function usersV(){
   },e=>{const l=$('ul');if(l)l.innerHTML='<div class="card er">'+esc(msg(e))+'</div>'});
 }
 
+/* ---------- الاتصال والتحديث ---------- */
+async function online(){
+  if(!navigator.onLine)return false;
+  try{const c=new AbortController(),t=setTimeout(()=>c.abort(),5000);await fetch('https://connectivitycheck.gstatic.com/generate_204',{mode:'no-cors',cache:'no-store',signal:c.signal});clearTimeout(t);return true}
+  catch(e){return false}
+}
+function hideOff(){const d=$('off');if(d)d.remove()}
+function showOff(){
+  if($('off'))return;
+  const d=document.createElement('div');d.id='off';d.className='off';
+  d.innerHTML='<div class="lg">EZO</div><h1>عذراً، لا يتوفر إنترنت</h1><p>تأكد من اتصالك بالشبكة ثم أعد المحاولة. يحتاج النظام إلى الإنترنت حتى تبقى بيانات المخزون دقيقة لكل المستخدمين.</p><button id="offr">إعادة المحاولة</button>';
+  document.body.appendChild(d);
+  $('offr').onclick=async()=>{const b=$('offr');b.disabled=true;b.textContent='جارٍ الفحص...';const ok=await online();b.disabled=false;b.textContent='إعادة المحاولة';if(ok){hideOff();if(U&&!P&&$('rt'))boot(U)}else toast('لا يزال الاتصال غير متوفر')};
+}
+async function doRefresh(b){
+  if(b)b.classList.add('spin');
+  if(!(await online())){if(b)b.classList.remove('spin');showOff();return}
+  try{const r=await navigator.serviceWorker.getRegistration();if(r)await r.update()}catch(e){}
+  setTimeout(()=>location.reload(),350);
+}
+addEventListener('offline',showOff);
+addEventListener('online',async()=>{if(await online()){hideOff();if(U&&!P&&$('rt'))boot(U)}});
+setInterval(async()=>{if($('off')&&await online())hideOff()},8000);
+if(!navigator.onLine)showOff();
 function closeOut(){const d=$('sho');if(d)d.remove()}
 function askOut(){closeOut();const d=document.createElement('div');d.className='sh dlg';d.id='sho';d.innerHTML='<div><h3>تسجيل الخروج</h3><p>هل تريد الخروج من حسابك؟</p><div class="g2"><button class="s" data-a="outno">إلغاء</button><button class="d" data-a="outyes">خروج</button></div></div>';d.onclick=e=>{if(e.target===d)closeOut()};document.body.appendChild(d)}
 document.addEventListener('click',async ev=>{
@@ -121,6 +147,7 @@ document.addEventListener('click',async ev=>{
   const a=b.dataset.a,k=b.dataset.e;
   try{
     if(a==='nav'){page=b.dataset.p;shell()}
+    else if(a==='refresh'){doRefresh(b)}
     else if(a==='out'){askOut()}
     else if(a==='outno'){closeOut()}
     else if(a==='outyes'){b.disabled=true;closeOut();await signOut(auth)}

@@ -1,0 +1,59 @@
+rules_version = '2';
+// قواعد حماية قاعدة بيانات EZO MEDIKAL
+// الصقها في: Firebase Console > Firestore Database > Rules ثم اضغط Publish
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signed() { return request.auth != null && request.auth.token.email != null && request.auth.token.email_verified == true; }
+    function me() { return request.auth.token.email.lower(); }
+    function isAdminEmail() { return signed() && me() == 'abdlhking3@gmail.com'; }
+    function hasProf() { return exists(/databases/$(database)/documents/users/$(me())); }
+    function prof() { return get(/databases/$(database)/documents/users/$(me())).data; }
+    function active() { return isAdminEmail() || (hasProf() && prof().active != false); }
+    function role() { return isAdminEmail() ? 'admin' : prof().role; }
+    function reader() { return signed() && active(); }
+    function writer() { return signed() && active() && (role() == 'admin' || role() == 'keeper'); }
+    function admin() { return signed() && active() && role() == 'admin'; }
+
+    // المستخدمون
+    match /users/{email} {
+      allow get: if signed() && (me() == email || admin());
+      allow list: if admin();
+      allow create: if (isAdminEmail() && me() == email) || admin();
+      allow update, delete: if admin();
+    }
+
+    // المخازن
+    match /warehouses/{id} {
+      allow read: if reader();
+      allow write: if admin();
+    }
+
+    // الأصناف
+    match /items/{id} {
+      allow read: if reader();
+      allow create, update: if writer();
+      allow delete: if admin();
+    }
+
+    // الطلبيات (لا تُحذف نهائياً)
+    match /orders/{id} {
+      allow read: if reader();
+      allow create, update: if writer();
+      allow delete: if false;
+    }
+
+    // ===== جديد: سجل حركات المخزون (لا يُعدَّل ولا يُحذف) =====
+    match /moves/{id} {
+      allow read: if reader();
+      allow create: if writer();
+      allow update, delete: if false;
+    }
+
+    // ===== جديد: عدّاد أرقام السندات وتاريخ آخر نسخة احتياطية =====
+    match /meta/{id} {
+      allow read: if reader();
+      allow write: if writer();
+    }
+  }
+}

@@ -21,6 +21,7 @@
 html{height:100%;-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--f);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 svg{display:block}
+html,body{overscroll-behavior-y:contain}
 
 /* ---------- الهيكل ---------- */
 #app{max-width:560px;margin:0 auto;padding:0 14px calc(env(safe-area-inset-bottom,0px) + 160px)}
@@ -111,7 +112,7 @@ button.g svg{width:20px;height:20px}
 @keyframes fade{from{opacity:0}}
 @keyframes slide{from{transform:translateY(36px);opacity:0}}
 @keyframes pop{from{transform:scale(.94);opacity:0}}
-.toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%);z-index:40;max-width:90%;padding:12px 20px;border-radius:14px;text-align:center;background:var(--navy);color:#fff;box-shadow:0 10px 28px rgba(0,0,0,.3),inset 0 0 0 1px rgba(232,203,134,.35);animation:drop .25s}
+.toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%);z-index:70;max-width:90%;padding:12px 20px;border-radius:14px;text-align:center;background:var(--navy);color:#fff;box-shadow:0 10px 28px rgba(0,0,0,.3),inset 0 0 0 1px rgba(232,203,134,.35);animation:drop .25s}
 @keyframes drop{from{transform:translate(-50%,-16px);opacity:0}}
 
 /* ---------- شاشات الدخول والحالة ---------- */
@@ -125,3 +126,57 @@ button.g svg{width:20px;height:20px}
 .sp{width:34px;height:34px;margin:0 auto 14px;border:3px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ---------- رأس التطبيق وزر التحديث ---------- */
+.hr{display:flex;align-items:center;gap:8px}
+.ic{width:40px;height:40px;min-height:0;padding:0;border-radius:12px;display:grid;place-items:center;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.ic svg{width:20px;height:20px}
+.ic.spin svg{animation:spin .8s linear infinite}
+
+/* ---------- تبويبات السجل والكراتين ---------- */
+.tc{background:var(--tint);color:var(--pri)}
+.neg{color:var(--bad)}.pos{color:var(--ok)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:12px;border-radius:14px;background:var(--line2);border:1px solid var(--line)}
+.seg button{min-height:42px;border-radius:10px;background:none;color:var(--mut);font-size:15px}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--sh)}
+.grp{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 8px;font-size:14px;color:var(--mut)}
+.grp b{color:var(--ink);font-size:16px}
+.ord.pick{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri),var(--sh)}
+.stp{display:flex;align-items:center;gap:6px}
+.stp button{width:42px;min-height:42px;padding:0;font-size:22px;border-radius:12px}
+.stp input{width:72px;margin:0;min-height:42px;padding:6px 4px;text-align:center;font-weight:700;font-size:18px}
+.ord .gold.big{font-size:20px}
+
+/* ---------- شاشة عدم وجود إنترنت ---------- */
+.off{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px;text-align:center;background:var(--bg)}
+.off .lg{width:76px;height:76px;border-radius:22px;font-size:22px}
+.off h1{margin:14px 0 0;font-size:24px}
+.off p{margin:0 0 18px;max-width:320px;color:var(--mut)}
+.off button{width:100%;max-width:320px;min-height:54px}
+
+/* ---------- السند والجداول ---------- */
+.vt{width:100%;border-collapse:collapse;font-size:12.5px}
+.vt th,.vt td{border:1px solid var(--line);padding:6px 4px;text-align:right}
+.vt th:first-child,.vt td:first-child{width:22px;text-align:center;padding:6px 2px}
+.vt th{background:var(--line2)}
+.vch{background:#fff;color:#111;border:1px solid var(--line);border-radius:14px;padding:14px 10px;margin-top:10px;font-size:14px}
+.vch .m{color:#555}
+.vch .vt th,.vch .vt td{border-color:#D5DAE1}
+.vch .vt th{background:#EEF1F5}
+.vh{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:2px solid #0B1D33}
+.vt1{flex:1}.vt1 b{display:block;font-size:18px}
+.vno{text-align:center}.vno b{display:block;font-size:22px;color:#0B1D33}
+.vm{display:grid;gap:4px;margin:12px 0}
+.vtot{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin:12px 0}
+.vsig{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:26px;text-align:center}
+.vsig i{display:block;border-bottom:1px solid #111;height:34px;margin-top:4px}
+.vft{margin-top:18px;text-align:center;font-size:12px;color:#555}
+@media print{
+  html,body{background:#fff!important}
+  body>*{display:none!important}
+  body>.sh{display:block!important;position:static;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;animation:none}
+  .sh>div{max-width:none;max-height:none;overflow:visible;box-shadow:none;padding:0;border-radius:0;animation:none}
+  .sh>div::before,.noprint{display:none!important}
+  .vch{border:0;margin:0;padding:0;font-size:15px}
+  @page{margin:12mm}
+}
